@@ -1,0 +1,25 @@
+{
+    "name": "lagdo/twitter-feed",
+    "type": "library",
+    "description": "Twitter feed based on the Jaxon ajax library.",
+    "authors": [
+        {"name": "Thierry Feuzeu"}
+    ],
+    "homepage": "https://github.com/lagdo/twitter-feed",
+    "license": "BSD-3-Clause",
+    "keywords": ["Twitter", "API", "Jaxon", "Ajax"],
+    "support": {
+        "issues": "https://github.com/lagdo/twitter-feed/issues",
+        "source": "https://github.com/lagdo/twitter-feed"
+    },
+    "require": {
+        "jaxon-php/jaxon-core": "^3.2",
+        "jaxon-php/jaxon-latte": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Lagdo\\TwitterFeed\\": "src/",
+            "Lagdo\\TwitterFeed\\Ajax\\": "ajax/"
+        }
+    }
+}
