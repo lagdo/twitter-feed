@@ -15,8 +15,9 @@ return [
         ],
     ],
     'container' => [
-        Lagdo\TwitterFeed\Client::class => function() {
-            return new Lagdo\TwitterFeed\Client();
+        Lagdo\TwitterFeed\Client::class => function($di) {
+            $package = $di->get(Lagdo\TwitterFeed\package::class);
+            return new Lagdo\TwitterFeed\Client($package->getConfig());
         },
     ],
 ];

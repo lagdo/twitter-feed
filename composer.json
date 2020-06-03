@@ -14,7 +14,8 @@
     },
     "require": {
         "jaxon-php/jaxon-core": "^3.2",
-        "jaxon-php/jaxon-latte": "^3.0"
+        "jaxon-php/jaxon-latte": "^3.0",
+        "dg/twitter-php": "^3.7"
     },
     "autoload": {
         "psr-4": {
