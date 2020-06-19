@@ -10,13 +10,13 @@ return [
     'views' => [
         'lagdo::twitter_feed' => [
             'directory' => __DIR__ . '/../templates',
-            'extension' => '.latte',
-            'renderer' => 'latte',
+            'extension' => '.php',
+            'renderer' => 'jaxon',
         ],
     ],
     'container' => [
         Lagdo\TwitterFeed\Client::class => function($di) {
-            $package = $di->get(Lagdo\TwitterFeed\package::class);
+            $package = $di->get(Lagdo\TwitterFeed\Package::class);
             return new Lagdo\TwitterFeed\Client($package->getConfig());
         },
     ],
