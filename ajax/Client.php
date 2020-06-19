@@ -38,7 +38,13 @@ class Client extends CallableClass
      */
     public function getTimeline($timeline)
     {
-        $tweets = $this->client->getTimeline(trim($timeline));
-        return $this->showTweets($tweets, $account);
+        $timeline = trim($timeline);
+        $tweets = $this->client->getTimeline($timeline);
+
+        $content = $this->view()->render('lagdo::twitter_feed::views/timeline/content', compact('tweets'));
+        $this->response->html("twitter_feed_$timeline", $content);
+        $this->response->script('jaxon.twitterFeed.enableRefresh()');
+
+        return $this->response;
     }
 }

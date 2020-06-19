@@ -6,6 +6,9 @@ use Jaxon\Utils\Config\Config;
 use DG\Twitter\Twitter as TwitterClient;
 use DG\Twitter\Exception as TwitterException;
 
+use DateTime;
+use Exception;
+
 /**
  * TwitterFeed client
  */
@@ -29,83 +32,80 @@ class Client
     }
 
     /**
-     * Make the Twitter API client
+     * Get a timeline content from the cache
      *
      * @param string $timeline  The timeline key in the configuration
      *
-     * @return TwitterClient
+     * @return array | false
      */
-    public function twitterClient($timeline)
+    protected function getCachedTimeline($timeline)
     {
+        $cacheTime = 30; // 1 minute et 30 secondes
+        $cacheFile = \dirname(__DIR__) . '/cache/' . $timeline . '.json';
+        if(\file_exists($$cacheFile) && \time() - $cacheTime < \filemtime($cacheFile)) {
+            return \json_decode(\file_get_contents($cacheFile));
+        }
+        return false;
+    }
+
+    /**
+     * Save a timeline content in the cache
+     *
+     * @param string $timeline  The timeline key in the configuration
+     * @param array  $statuses  The timeline content
+     *
+     * @return void
+     */
+    protected function cacheTimeline($timeline, $statuses)
+    {
+        try
+        {
+            $cacheFile = \dirname(__DIR__) . '/cache/' . $timeline . '.json';
+            \file_put_contents($cacheFile, \json_encode($statuses));
+        }
+        catch(Exception $e){}
+    }
+
+    /**
+     * Fetch a timeline from Twitter
+     *
+     * @param string $timeline  The timeline key in the configuration
+     *
+     * @return array
+     */
+    protected function fetchTimeline($timeline)
+    {
+        $types = [
+            'home' => TwitterClient::ME,
+            'user' => TwitterClient::ME_AND_FRIENDS,
+            'mentions' => TwitterClient::REPLIES,
+        ];
+        $type = $this->config->getOption("timelines.$timeline.type", 'home');
+        if(\array_key_exists($type, $types))
+        {
+            return [];
+        }
+
         $authConfigKey = "timelines.$timeline.auth";
         if(\is_string(($auth = $this->config->getOption($authConfigKey))))
         {
             $authConfigKey = "auth.$auth";
         }
-        return new TwitterClient(
-            $this->config->getOption("$authConfigKey.consumer_key", ''),
-            $this->config->getOption("$authConfigKey.consumer_secret", ''),
-            $this->config->getOption("$authConfigKey.access_token", ''),
-            $this->config->getOption("$authConfigKey.access_token_secret", '')
-        );
-    }
 
-    /**
-     * Get the most recent tweets posted by the user and the users he follows.
-     *
-     * @param string $timeline  The timeline key in the configuration
-     *
-     * @return array
-     */
-    protected function getHomeTimeline($timeline)
-    {
         try
         {
-            return $this->twitterClient($timeline)->load(TwitterClient::ME);
+            $twitterClient = new TwitterClient(
+                $this->config->getOption("$authConfigKey.consumer_key", ''),
+                $this->config->getOption("$authConfigKey.consumer_secret", ''),
+                $this->config->getOption("$authConfigKey.access_token", ''),
+                $this->config->getOption("$authConfigKey.access_token_secret", '')
+            );
+
+            return $twitterClient->load($types[$type]);
         }
         catch(TwitterException $e)
         {
-            jaxon()->logger()->error($e->getMessage());
-            return [];
-        }
-    }
-
-    /**
-     * Get the most recent Tweets posted by the user.
-     *
-     * @param string $timeline  The timeline key in the configuration
-     *
-     * @return array
-     */
-    protected function getUserTimeline($timeline)
-    {
-        try
-        {
-            return $this->twitterClient($timeline)->load(TwitterClient::ME_AND_FRIENDS);
-        }
-        catch(TwitterException $e)
-        {
-            jaxon()->logger()->error($e->getMessage());
-            return [];
-        }
-    }
-
-    /**
-     * Get the most recent mentions for the user.
-     *
-     * @param string $timeline  The timeline key in the configuration
-     *
-     * @return array
-     */
-    protected function getMentionsTimeline($timeline)
-    {
-        try
-        {
-            return $this->twitterClient($timeline)->load(TwitterClient::REPLIES);
-        }
-        catch(TwitterException $e)
-        {
-            jaxon()->logger()->error($e->getMessage());
+            \jaxon()->logger()->error($e->getMessage());
             return [];
         }
     }
@@ -115,18 +115,26 @@ class Client
      *
      * @param array $statuses   Statuses returned by the library, to be formatted.
      * @param integer $count    The max number of tweets to return
-     * @return void
+     *
+     * @return array
      */
-    protected function formatTweets($statuses, $count)
+    protected function formatTimeline($statuses, $count)
     {
         $statuses = \array_slice($statuses, 0, $count);
         $tweets = [];
         foreach($statuses as $status)
         {
-            $tweets[] = [
+            $date = DateTime::createFromFormat('D M d H:i:s O Y', $status->created_at);
+            $tweets[] = (object)[
+                'date' => $date->format('M d, Y H:i:s'),
                 'message' => TwitterClient::clickable($status),
-                'date' => $status->created_at,
-                'user' => $status->user->name,
+                'url' => 'https://twitter.com/i/web/status/' . $status->id_str,
+                'user' => (object)[
+                    'name' => $status->user->name,
+                    'screen_name' => $status->user->screen_name,
+                    'url' => 'https://twitter.com/' . $status->user->screen_name,
+                    'image_url' => $status->user->profile_image_url_https,
+                ],
             ];
         }
         return $tweets;
@@ -145,27 +153,26 @@ class Client
         // Check if the timeline exists in the config.
         if(!$this->config->getOption("timelines.$timeline", false))
         {
-            jaxon()->logger()->error("No entry with id $timeline in the config.");
+            \jaxon()->logger()->error("No entry with id $timeline in the config.");
             return [];
         }
 
-        $type = $this->config->getOption("timelines.$timeline.type", 'home');
-        switch(trim($type))
+        $statuses = $this->getCachedTimeline($timeline);
+        if(!$statuses || \count($statuses) == 0)
         {
-        case 'home';
-            $statuses = $this->getHomeTimeline($timeline);
-            break;
-        case 'user';
-            $statuses = $this->getUserTimeline($timeline);
-            break;
-        case 'mentions';
-            $statuses = $this->getMentionsTimeline($timeline);
-            break;
-        default:
+            $statuses = $this->fetchTimeline($timeline);
+        }
+        if(\count($statuses) == 0)
+        {
             return [];
         }
 
-        $count = intval($this->config->getOption("timelines.$timeline.count", 10));
-        return $this->formatTweets($statuses, $count);
+        $count = \intval($this->config->getOption("timelines.$timeline.count", 10));
+        $statuses = $this->formatTimeline($statuses, $count);
+
+        // Save the timeline in the cache
+        $this->cacheTimeline($timeline, $statuses);
+
+        return $statuses;
     }
 }
