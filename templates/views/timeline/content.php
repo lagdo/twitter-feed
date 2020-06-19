@@ -15,7 +15,7 @@
             <?php echo $tweet->message ?>
         </div>
         <div class="twitter-link" style="float:left">
-            <a href="<?php echo $tweet->url ?>" target="_blank"><?php echo $tweet->url ?></a>
+            <a href="<?php echo $tweet->url ?>" target="_blank"> Read </a>
         </div>
         <div class="twitter-date" style="float:right">
             <?php echo $tweet->date ?>
