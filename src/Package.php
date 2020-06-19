@@ -17,7 +17,19 @@ class Package extends JaxonPackage
      */
     public static function getConfigFile()
     {
-        return realpath(__DIR__ . '/../config/twitter.php');
+        \class_alias('Twitter', 'DG\Twitter\Twitter');
+        \class_alias('TwitterException', 'DG\Twitter\Exception');
+        return \realpath(__DIR__ . '/../config/twitter.php');
+    }
+
+    /**
+     * Get the HTML tags to include CSS code and files into the page
+     *
+     * @return string
+     */
+    public function getCss()
+    {
+        return '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lagdo/twitter-feed@master/dist/css/twitter.min.css" />';
     }
 
     /**
@@ -27,7 +39,7 @@ class Package extends JaxonPackage
      */
     public function getScript()
     {
-        $clientCall = jaxon()->request(AjaxClient::class)->getTimeline(pm()->js('timeline'));
+        $clientCall = \jaxon()->request(AjaxClient::class)->getTimeline(pm()->js('timeline'));
         return $this->view()->render('lagdo::twitter_feed::codes/script')
             ->with('clientCall', $clientCall);
     }
