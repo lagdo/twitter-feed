@@ -42,7 +42,7 @@ class Client
     {
         $cacheTime = 30; // 1 minute et 30 secondes
         $cacheFile = \dirname(__DIR__) . '/cache/' . $timeline . '.json';
-        if(\file_exists($$cacheFile) && \time() - $cacheTime < \filemtime($cacheFile)) {
+        if(\file_exists($cacheFile) && \time() - $cacheTime < \filemtime($cacheFile)) {
             return \json_decode(\file_get_contents($cacheFile));
         }
         return false;
@@ -81,7 +81,7 @@ class Client
             'mentions' => TwitterClient::REPLIES,
         ];
         $type = $this->config->getOption("timelines.$timeline.type", 'home');
-        if(\array_key_exists($type, $types))
+        if(!\array_key_exists($type, $types))
         {
             return [];
         }
