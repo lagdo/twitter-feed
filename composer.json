@@ -14,7 +14,7 @@
     },
     "require": {
         "jaxon-php/jaxon-core": "^3.2",
-        "dg/twitter-php": "3.8"
+        "dg/twitter-php": "4.1.*"
     },
     "autoload": {
         "psr-4": {
