@@ -15,9 +15,11 @@ return [
         ],
     ],
     'container' => [
-        Lagdo\TwitterFeed\Client::class => function($di) {
-            $package = $di->get(Lagdo\TwitterFeed\Package::class);
-            return new Lagdo\TwitterFeed\Client($package->getConfig());
-        },
+        'set' => [
+            Lagdo\TwitterFeed\Client::class => function($di) {
+                $package = $di->get(Lagdo\TwitterFeed\Package::class);
+                return new Lagdo\TwitterFeed\Client($package->getConfig());
+            },
+        ],
     ],
 ];
