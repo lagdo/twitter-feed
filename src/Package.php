@@ -17,8 +17,6 @@ class Package extends JaxonPackage
      */
     public static function config()
     {
-        \class_alias('Twitter', 'DG\Twitter\Twitter');
-        \class_alias('TwitterException', 'DG\Twitter\Exception');
         return \realpath(__DIR__ . '/../config/twitter.php');
     }
 
