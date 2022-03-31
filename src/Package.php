@@ -15,7 +15,7 @@ class Package extends JaxonPackage
      *
      * @return string
      */
-    public static function getConfigFile()
+    public static function config()
     {
         \class_alias('Twitter', 'DG\Twitter\Twitter');
         \class_alias('TwitterException', 'DG\Twitter\Exception');
@@ -27,7 +27,7 @@ class Package extends JaxonPackage
      *
      * @return string
      */
-    public function getCss()
+    public function getCss(): string
     {
         return '<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/lagdo/twitter-feed@master/dist/css/twitter.min.css" />';
     }
@@ -37,7 +37,7 @@ class Package extends JaxonPackage
      *
      * @return string
      */
-    public function getScript()
+    public function getScript(): string
     {
         $clientCall = \jaxon()->request(AjaxClient::class)->getTimeline(pm()->js('timeline'));
         return $this->view()->render('lagdo::twitter_feed::codes/script')
@@ -49,7 +49,7 @@ class Package extends JaxonPackage
      *
      * @return string
      */
-    public function getReadyScript()
+    public function getReadyScript(): string
     {
         $timelines = \array_keys($this->aOptions['timelines']);
         return "jaxon.twitterFeed.timelines=['" .
@@ -63,7 +63,7 @@ class Package extends JaxonPackage
      *
      * @return Package
      */
-    public function timeline($timeline)
+    public function timeline($timeline): Package
     {
         $this->timeline = $timeline;
         return $this;
@@ -74,7 +74,7 @@ class Package extends JaxonPackage
      *
      * @return string
      */
-    public function getHtml()
+    public function getHtml(): string
     {
         return $this->view()->render('lagdo::twitter_feed::views/timeline/wrapper')
             ->with('timeline', $this->timeline);
