@@ -5,11 +5,23 @@ namespace Lagdo\TwitterFeed;
 use Jaxon\Plugin\Package as JaxonPackage;
 use Lagdo\TwitterFeed\Ajax\Client as AjaxClient;
 
+use function array_keys;
+use function implode;
+use function realpath;
+use function pm;
+
 /**
  * TwitterFeed package
  */
 class Package extends JaxonPackage
 {
+    /**
+     * The timeline to display
+     *
+     * @var string
+     */
+    protected $timeline = '';
+
     /**
      * Get the path to the config file
      *
@@ -17,7 +29,7 @@ class Package extends JaxonPackage
      */
     public static function config()
     {
-        return \realpath(__DIR__ . '/../config/twitter.php');
+        return realpath(__DIR__ . '/../config/twitter.php');
     }
 
     /**
@@ -37,7 +49,7 @@ class Package extends JaxonPackage
      */
     public function getScript(): string
     {
-        $clientCall = \jaxon()->request(AjaxClient::class)->getTimeline(pm()->js('timeline'));
+        $clientCall = $this->factory()->request(AjaxClient::class)->getTimeline(pm()->js('timeline'));
         return $this->view()->render('lagdo::twitter_feed::codes/script')
             ->with('clientCall', $clientCall);
     }
@@ -49,7 +61,7 @@ class Package extends JaxonPackage
      */
     public function getReadyScript(): string
     {
-        $timelines = \array_keys($this->aOptions['timelines']);
+        $timelines = array_keys($this->getOption('timelines', []));
         return "jaxon.twitterFeed.timelines=['" .
             implode("','", $timelines) . "'];jaxon.twitterFeed.initFetch();";
     }
