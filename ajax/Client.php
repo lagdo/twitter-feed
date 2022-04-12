@@ -4,7 +4,7 @@ namespace Lagdo\TwitterFeed\Ajax;
 
 use Lagdo\TwitterFeed\Client as TwitterClient;
 
-use Jaxon\CallableClass;
+use Jaxon\App\CallableClass;
 use Exception;
 
 /**
