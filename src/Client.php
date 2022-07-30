@@ -9,6 +9,8 @@ use DG\Twitter\Exception as TwitterException;
 use DateTime;
 use Exception;
 
+use function Jaxon\jaxon;
+
 /**
  * TwitterFeed client
  */
@@ -105,7 +107,7 @@ class Client
         }
         catch(TwitterException $e)
         {
-            \jaxon()->logger()->error($e->getMessage());
+            jaxon()->logger()->error($e->getMessage());
             return [];
         }
     }
@@ -153,7 +155,7 @@ class Client
         // Check if the timeline exists in the config.
         if(!$this->config->getOption("timelines.$timeline", false))
         {
-            \jaxon()->logger()->error("No entry with id $timeline in the config.");
+            jaxon()->logger()->error("No entry with id $timeline in the config.");
             return [];
         }
 
