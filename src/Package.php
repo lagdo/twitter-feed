@@ -5,10 +5,10 @@ namespace Lagdo\TwitterFeed;
 use Jaxon\Plugin\Package as JaxonPackage;
 use Lagdo\TwitterFeed\Ajax\Client as AjaxClient;
 
+use function Jaxon\pm;
 use function array_keys;
 use function implode;
 use function realpath;
-use function pm;
 
 /**
  * TwitterFeed package
