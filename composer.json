@@ -13,7 +13,7 @@
         "source": "https://github.com/lagdo/twitter-feed"
     },
     "require": {
-        "jaxon-php/jaxon-core": "^3.2",
+        "jaxon-php/jaxon-core": "^4.0",
         "dg/twitter-php": "4.1.*"
     },
     "autoload": {
